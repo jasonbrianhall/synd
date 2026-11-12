@@ -1,0 +1,11 @@
+/build/
+/build-trace/
+/build-*/
+/out/
+__pycache__/
+*.pyc
+.vs/
+.DS_Store
+# the original game files and the code generated from them: never part of this repository
+/_references/
+/gen/

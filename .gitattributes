@@ -1,0 +1,2 @@
+# keep every file byte-exact (game data must not be touched by line-ending conversion)
+* -text

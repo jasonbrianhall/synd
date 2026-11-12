@@ -1,0 +1,36 @@
+/* syndicate64.rc - Syndicate64.exe's resources: the application icon (built by tools/make_icon.ps1 from the
+ * artwork res/syndicate-icon.png), the manifest and the version information.  The About box's title
+ * (src/platform/win32/win32_main.c) carries the same version. */
+#include <winver.h>
+
+1 ICON "syndicate64.ico"
+
+1 24 "syndicate64.manifest"
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
+ FILEFLAGS 0x0L
+ FILEOS VOS_NT_WINDOWS32
+ FILETYPE VFT_APP
+ FILESUBTYPE VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "FileDescription", "Syndicate Plus 64bit (Syndicate64)"
+            VALUE "FileVersion", "1.0.0"
+            VALUE "InternalName", "Syndicate64"
+            VALUE "LegalCopyright", "Copyright (c) 2026 Onur BUYUKCAGLAR"
+            VALUE "OriginalFilename", "Syndicate64.exe"
+            VALUE "ProductName", "Syndicate Plus 64bit"
+            VALUE "ProductVersion", "1.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 1200
+    END
+END
