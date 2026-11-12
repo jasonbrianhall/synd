@@ -19,9 +19,9 @@ time and checks that they are the ones it was built from.
 
 ## Download
 
-[Releases](https://github.com/Buyukcaglar/synd/releases) has the macOS app (signed and notarized).  On first
-start it asks for the folder of your Syndicate Plus installation (the one with `SYND.EXE`), then remembers it.
-A Windows build will follow; until then, build it from source (below).
+[Releases](https://github.com/Buyukcaglar/synd/releases) has the Windows program (`Syndicate64.exe`, 64-bit
+Windows 10 or later) and the macOS app (signed and notarized).  On first start it asks for the folder of your
+Syndicate Plus installation (the one with `SYND.EXE`), then remembers it.
 
 ## The game files
 
