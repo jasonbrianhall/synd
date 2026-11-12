@@ -19,6 +19,7 @@
  *   appearance:dark|light|system   the app's appearance
  *   close              the window's close button
  *   fatal              host_fatal() from another thread ; snapmodal:NAME  DIR/NAME.png of the open dialog
+ *   size:W:H           the window's content size (points), centred again
  *   mini / unmini      minimizes the window / brings it back
  *   full               the "Full Screen" menu item ; state  logs macos_state() ; quit  Cmd+Q
  * Every action is logged with host_log ("devtest: ..."), so a --log file shows what happened when. */
@@ -228,6 +229,9 @@ static void run_action(NSString *act)
             if (w != g_win && w.isVisible && w.frame.size.height > 60) snap_window(w, [a[1] stringByAppendingString:@".png"]);
     } else if ([k isEqualToString:@"close"]) {
         [g_win performClose:nil];
+    } else if ([k isEqualToString:@"size"]) {
+        [g_win setContentSize:NSMakeSize(a[1].doubleValue, a[2].doubleValue)];
+        [g_win center];
     } else if ([k isEqualToString:@"mini"]) {
         [g_win miniaturize:nil];
     } else if ([k isEqualToString:@"unmini"]) {
