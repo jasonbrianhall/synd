@@ -22,6 +22,26 @@ MODULES = [
     ("SYNDICAT/DATA/GAMEFM.DLL", "drv_fm", "--reloc"),
 ]
 
+def find(rel):
+    """the real path of `rel` under REF, ignoring case (a Linux file system is case-sensitive; installers and
+    innoextract may give lowercase names)"""
+    path = REF
+    for part in rel.split("/"):
+        exact = os.path.join(path, part)
+        if os.path.exists(exact):
+            path = exact
+            continue
+        try:
+            match = next((n for n in sorted(os.listdir(path)) if n.lower() == part.lower()), None)
+        except OSError:
+            match = None
+        if match is None:
+            sys.exit(f"{os.path.join(REF, rel)} was not found (in any case): is the whole Syndicate Plus "
+                     f"installation in _references/dos?")
+        path = os.path.join(path, match)
+    return path
+
+
 if __name__ == "__main__":
     only = set(sys.argv[1:])
     for exe, prefix, *extra in MODULES:
@@ -29,4 +49,4 @@ if __name__ == "__main__":
             continue
         # not isolated (-I): Capstone is often installed with "pip install --user", which -I would not see
         subprocess.check_call([sys.executable, os.path.join(ROOT, "tools", "recomp.py"),
-                               os.path.join(REF, exe), prefix, os.path.join(ROOT, "gen", prefix)] + extra)
+                               find(exe), prefix, os.path.join(ROOT, "gen", prefix)] + extra)
