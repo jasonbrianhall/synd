@@ -53,10 +53,20 @@ if(MSVC)
   set_source_files_properties(${GEN_SOURCES} PROPERTIES COMPILE_OPTIONS "/O2;/Ob2;/GF;/bigobj")
 else()
   target_compile_options(syncore PRIVATE -Wall -Wno-comment -Wno-unused-label -Wno-unused-variable -Wno-unused-but-set-variable)
+  if(NOT CMAKE_C_COMPILER_ID MATCHES "Clang")
+    # GCC: the core cuts long DOS names and paths with snprintf on purpose
+    target_compile_options(syncore PRIVATE -Wno-format-truncation)
+  endif()
   # the generated code at -O2 as with MSVC (clang needs about 2.5 s and 180 MB per file there; -O3 brings
   # nothing measurable for this kind of code), with the warnings its mechanical style gives switched off
-  set_source_files_properties(${GEN_SOURCES} PROPERTIES COMPILE_OPTIONS
-    "-O2;-Wno-unused-function;-Wno-parentheses-equality;-Wno-self-assign;-Wno-unused-value;-Wno-tautological-compare")
+  if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+    set_source_files_properties(${GEN_SOURCES} PROPERTIES COMPILE_OPTIONS
+      "-O2;-Wno-unused-function;-Wno-parentheses-equality;-Wno-self-assign;-Wno-unused-value;-Wno-tautological-compare")
+  else()
+    # GCC: the same, under GCC's names for these warnings
+    set_source_files_properties(${GEN_SOURCES} PROPERTIES COMPILE_OPTIONS
+      "-O2;-Wno-unused-function;-Wno-unused-value;-Wno-parentheses;-Wno-misleading-indentation;-Wno-maybe-uninitialized;-Wno-type-limits")
+  endif()
 endif()
 
 # ---- the portable presentation code the front ends share (no OS calls) -----------------------------------
@@ -185,6 +195,55 @@ elseif(APPLE)
     src/platform/headless/headless_main.c
     src/platform/posix/posix_sys.c)
   target_link_libraries(synd_headless PRIVATE syncore synvideo)
+  if(SYN_EMBED_GAME)
+    # the tests' built-in-files run reads build/syndgame.pak
+    add_custom_target(syndgame_pak ALL DEPENDS "${SYN_PAK}")
+  endif()
+else()
+  # Linux and other Unix systems: an SDL2 front end (sudo apt install libsdl2-dev, dnf install SDL2-devel,
+  # pacman -S sdl2)
+  set(SYN_VERSION "1.0.0")
+  find_package(Threads REQUIRED)
+  find_package(SDL2 CONFIG QUIET)
+  if(NOT TARGET SDL2::SDL2)
+    find_package(PkgConfig QUIET)
+    if(PKG_CONFIG_FOUND)
+      pkg_check_modules(SDL2PC IMPORTED_TARGET sdl2)
+    endif()
+    if(NOT TARGET PkgConfig::SDL2PC)
+      message(FATAL_ERROR "SDL2 was not found: install its development files (Debian/Ubuntu: libsdl2-dev, "
+                          "Fedora: SDL2-devel, Arch: sdl2)")
+    endif()
+    set(SYN_SDL2 PkgConfig::SDL2PC)
+  else()
+    set(SYN_SDL2 SDL2::SDL2)
+  endif()
+
+  # the game: Syndicate64 (both games in one program)
+  add_executable(syndicate64
+    src/platform/linux/linux_main.c
+    src/platform/posix/posix_sys.c)
+  set_target_properties(syndicate64 PROPERTIES OUTPUT_NAME Syndicate64)
+  target_compile_definitions(syndicate64 PRIVATE SYN_VERSION="${SYN_VERSION}")
+  target_compile_options(syndicate64 PRIVATE -Wall)
+  if(NOT CMAKE_C_COMPILER_ID MATCHES "Clang")
+    target_compile_options(syndicate64 PRIVATE -Wno-format-truncation)
+  endif()
+  target_link_libraries(syndicate64 PRIVATE syncore synvideo ${SYN_SDL2} Threads::Threads m)
+  # the private build: the pack linked into the program's read-only data
+  if(SYN_EMBED_GAME)
+    target_sources(syndicate64 PRIVATE src/platform/linux/linux_pack.c)
+    target_compile_definitions(syndicate64 PRIVATE SYN_EMBED_GAME)
+    set_source_files_properties(src/platform/linux/linux_pack.c PROPERTIES
+      COMPILE_DEFINITIONS "SYN_PAK_PATH=\"${SYN_PAK}\""
+      OBJECT_DEPENDS "${SYN_PAK}")
+    message(STATUS "Syndicate64 carries the game files from ${SYN_GAME_DIR}")
+  endif()
+
+  add_executable(synd_headless
+    src/platform/headless/headless_main.c
+    src/platform/posix/posix_sys.c)
+  target_link_libraries(synd_headless PRIVATE syncore synvideo Threads::Threads m)
   if(SYN_EMBED_GAME)
     # the tests' built-in-files run reads build/syndgame.pak
     add_custom_target(syndgame_pak ALL DEPENDS "${SYN_PAK}")

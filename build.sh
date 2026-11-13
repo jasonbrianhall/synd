@@ -1,6 +1,6 @@
 #!/bin/sh
-# build.sh - configure and build on macOS (the counterpart of build.cmd): a universal (arm64 + x86_64) release
-# build into build/: Syndicate64.app and synd_headless.  Extra arguments go to CMake's configure step, e.g.
+# build.sh - configure and build on macOS or Linux (the counterpart of build.cmd): a release build into build/:
+# on macOS a universal (arm64 + x86_64) Syndicate64.app, on Linux Syndicate64 (SDL2); and synd_headless.  Extra arguments go to CMake's configure step, e.g.
 #   ./build.sh -DSYN_EMBED_GAME=OFF      a public build without the game files
 #   ./build.sh -DSYN_DEVTEST=ON          with the app's development checks (src/platform/macos/macos_devtest.m)
 set -e
